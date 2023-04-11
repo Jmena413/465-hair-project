@@ -1,117 +1,97 @@
 #include "Hair.h"
-using namespace basicgraphics;
+
+#define FONTSTASH_IMPLEMENTATION
+#include <fontstash.h>
+#define GLFONTSTASH_IMPLEMENTATION
+#include <glfontstash.h>
 
 #include <config/VRDataIndex.h>
 
 Hair::Hair(int argc, char** argv) : VRApp(argc, argv)
 {
-    _turntable.reset(new TurntableManipulator(3, 0.3, 0.5));
-    _turntable->setCenterPosition(vec3(-0.3, 0.8, 0));
-
-    _drawLightVector = true;
-    _ambientOnOff = 1.0;
-    _diffuseOnOff = 1.0;
-    _specularOnOff = 1.0;
-    _lastTime = 0.0;
-    _curFrameTime = 0.0;
+	_lastTime = 0.0;
+	_angle = 0;
 
 }
 
 Hair::~Hair()
 {
+	glfonsDelete(fs);
 	shutdown();
 }
 
-void Hair::onAnalogChange(const VRAnalogEvent &state) {
+void Hair::onAnalogChange(const VRAnalogEvent &event) {
     // This routine is called for all Analog_Change events.  Check event->getName()
     // to see exactly which analog input has been changed, and then access the
     // new value with event->getValue().
     
-	if (state.getName() == "FrameStart") {
+	if (event.getName() == "FrameStart") {
 		_lastTime = _curFrameTime;
-		_curFrameTime = state.getValue();
-		// Calculate model matrix based on time
-		float scaledTime = 0.5f*_curFrameTime;
-
-		// Make the light orbit around the bunny so we can see the lighting change in response to the light position
-		float radius = 5.0;
-		_lightPosition = vec4(cos(scaledTime*0.6)*sin(scaledTime*0.5)*radius,
-			cos(scaledTime*0.3)*sin(scaledTime*0.2)*radius,
-			cos(scaledTime*0.1)*sin(scaledTime*0.4)*radius,
-			1.0);
+		_curFrameTime = event.getValue();
 	}
-}
 
+
+}
 
 void Hair::onButtonDown(const VRButtonEvent &event) {
-    _turntable->onButtonDown(event);
-    string name = event.getName();
-    if (name == "KbdL_Down") {
-        _drawLightVector = !_drawLightVector; // Toggle drawing the vector to the light on or off
+    // This routine is called for all Button_Down events.  Check event->getName()
+    // to see exactly which button has been pressed down.
+	//You can respond to individual events like this:
+	/*
+    if (event.getName() == _paintOnEvent) {
+        _painting = true;
     }
-    // Press S to toggle specular lighting on/off
-    else if (name == "KbdS_Down") {
-        if (_specularOnOff == 1.0) {
-            _specularOnOff = 0.0;
-        }
-        else {
-            _specularOnOff = 1.0;
-        }
+    else if (event.getName() == _grabOnEvent) {
+        _grabbing = true;
     }
-    // Press D to toggle diffuse lighting on/off
-    else if (name == "KbdD_Down") {
-        if (_diffuseOnOff == 1.0) {
-            _diffuseOnOff = 0.0;
-        }
-        else {
-            _diffuseOnOff = 1.0;
-        }
-    }
-    // Press A to toggle ambient lighting on/off
-    else if (name == "KbdA_Down") {
-        if (_ambientOnOff == 1.0) {
-            _ambientOnOff = 0.0;
-        }
-        else {
-            _ambientOnOff = 1.0;
-        }
-    }
-}
+	*/
 
+	//std::cout << "ButtonDown: " << event.getName() << std::endl;
+
+}
 
 void Hair::onButtonUp(const VRButtonEvent &event) {
-    _turntable->onButtonUp(event);
-}
+    // This routine is called for all Button_Up events.  Check event->getName()
+    // to see exactly which button has been released.
 
+	//std::cout << "ButtonUp: " << event.getName() << std::endl;
+}
 
 void Hair::onCursorMove(const VRCursorEvent &event) {
-    _turntable->onCursorMove(event);
+	// This routine is called for all mouse move events. You can get the absolute position
+	// or the relative position within the window scaled 0--1.
+	
+	//std::cout << "MouseMove: "<< event.getName() << " " << event.getPos()[0] << " " << event.getPos()[1] << std::endl;
 }
 
-void Hair::reloadShaders()
-{
-	_shader.compileShader("BlinnPhong.vert", GLSLShader::VERTEX);
-	_shader.compileShader("BlinnPhong.frag", GLSLShader::FRAGMENT);
-	_shader.link();
-	_shader.use();
+void Hair::onTrackerMove(const VRTrackerEvent &event) {
+    // This routine is called for all Tracker_Move events.  Check event->getName()
+    // to see exactly which tracker has moved, and then access the tracker's new
+    // 4x4 transformation matrix with event->getTransform().
+
+	// We will use trackers when we do a virtual reality assignment. For now, you can ignore this input type.
 }
+
     
 void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
     // This routine is called once per graphics context at the start of the
     // rendering process.  So, this is the place to initialize textures,
     // load models, or do other operations that you only want to do once per
-    // frame when in stereo mode.
+    // frame.
     
+	// Is this the first frame that we are rendering after starting the app?
     if (renderState.isInitialRenderCall()) {
 
-#ifndef __APPLE__
-		glewExperimental = GL_TRUE;
-		GLenum err = glewInit();
-		if (GLEW_OK != err)
-		{
-			std::cout << "Error initializing GLEW." << std::endl;
-		}
-#endif     
+		//For windows, we need to initialize a few more things for it to recognize all of the
+		// opengl calls.
+		#ifndef __APPLE__
+			glewExperimental = GL_TRUE;
+			GLenum err = glewInit();
+			if (GLEW_OK != err)
+			{
+				std::cout << "Error initializing GLEW." << std::endl;
+			}
+		#endif     
 
 
         glEnable(GL_DEPTH_TEST);
@@ -121,113 +101,127 @@ void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
+		glEnable(GL_MULTISAMPLE);
+
+		// This sets the background color that is used to clear the canvas
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
 		// This load shaders from disk, we do it once when the program starts up.
 		reloadShaders();
 
-		// This loads the model from a file and initializes an instance of the model class to store it
-		_modelMesh.reset(new Model("bunny.obj", 1.0, vec4(1.0)));
+		// Make our model objects
+		_box.reset(new Box(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), vec4(1.0, 0.0, 0.0, 1.0)));
 
-		//Loading textures
-		_diffuseRamp = Texture::create2DTextureFromFile("lightingToon.jpg");
-		_diffuseRamp->setTexParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		_diffuseRamp->setTexParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		_specularRamp = Texture::create2DTextureFromFile("lightingToon.jpg");
-		_specularRamp->setTexParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		_specularRamp->setTexParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		initializeText();
     }
+
+	// Update the angle every frame:
+	_angle += glm::radians(1.0);
 }
 
+
 void Hair::onRenderGraphicsScene(const VRGraphicsState &renderState) {
-    // This routine is called once per eye.  This is the place to actually
+    // This routine is called once per eye/camera.  This is the place to actually
     // draw the scene.
     
+	// clear the canvas and other buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    
-	// Setup the camera with a good initial position and view direction to see the table
-	glm::mat4 model(1.0);
-	_shader.use(); // Tell opengl we want to use this specific shader.
-	
+
+	// Setup the view matrix to set where the camera is located in the scene
+	glm::vec3 eye_world = glm::vec3(0, 0, 5);
+	glm::mat4 view = glm::lookAt(eye_world, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	// When we use virtual reality, this will be replaced by:
+	// eye_world = glm::make_vec3(renderState.getCameraPos())
+	// view = glm::make_mat4(renderState.getViewMatrix());
+
+	// Setup the projection matrix so that things are rendered in perspective
 	GLfloat windowHeight = renderState.index().getValue("FramebufferHeight");
 	GLfloat windowWidth = renderState.index().getValue("FramebufferWidth");
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), windowWidth / windowHeight, 0.01f, 100.0f);
+	// When we use virtual reality, this will be replaced by:
+	// projection = glm::make_mat4(renderState.getProjectionMatrix())
+	
+	// Setup the model matrix
+	glm::mat4 model = glm::mat4(1.0);
 
-    glm::mat4 view = _turntable->frame();;
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), windowWidth / windowHeight, 0.1f, 100.0f);
+	glm::mat4 rotate = glm::toMat4(glm::angleAxis(_angle, vec3(0, 1, 0))) * glm::toMat4(glm::angleAxis(glm::radians(20.0f), vec3(1.0, 0.0, 0.0)));
+	model = rotate * model;
+    
+	// Tell opengl we want to use this specific shader.
+	_shader.use();
+	
 	_shader.setUniform("view_mat", view);
 	_shader.setUniform("projection_mat", projection);
 	
 	_shader.setUniform("model_mat", model);
 	_shader.setUniform("normal_mat", mat3(transpose(inverse(model))));
-	vec3 eyePosition = _turntable->getPos();
-	_shader.setUniform("eye_world", eyePosition);
+	_shader.setUniform("eye_world", eye_world);
 
 
-	// Properties of the material the model is made out of (the "K" terms in the equations discussed in class)
-	// These values should make the model look like it is made out of a metal, like brass
-	/*
-	vec3 ambientReflectionCoeff = vec3(0.4125, 0.275, 0.0375);
-	vec3 diffuseReflectionCoeff = vec3(0.78, 0.57, 0.11);
-	vec3 specularReflectionCoeff = vec3(0.99, 0.94, 0.80);
-	float specularExponent = 27.9;
-	*/
-	
-
-	// For toon shading, you want all the color to come from the texture, so you can just use a white bunny like this:
-
-	vec3 ambientReflectionCoeff = vec3(1, 1, 1);
-	vec3 diffuseReflectionCoeff = vec3(1, 1, 1);
-	vec3 specularReflectionCoeff = vec3(1, 1, 1);
-	float specularExponent = 50.0;
-
-
-	// Properties of the light source (the "I" terms in the equations discussed in class)
-	// These values are for a white light so the r,g,b intensities are all the same
-	// Note: lightPosition is another important property of the light; it is set at the top of the method
-	vec3 ambientLightIntensity = vec3(0.4, 0.4, 0.4);
-	vec3 diffuseLightIntensity = vec3(0.6, 0.6, 0.6);
-	vec3 specularLightIntensity = vec3(1.0, 1.0, 1.0);
-
-	// Multiply these light intensities by the OnOff terms below to turn each commonent on the lighting on/off based on keystrokes
-	ambientLightIntensity *= _ambientOnOff;
-	diffuseLightIntensity *= _diffuseOnOff;
-	specularLightIntensity *= _specularOnOff;
-
-
-	// TODO: Pass these parameters into your shader programs... in shader programs these are called "uniform variables"
-
-	_shader.setUniform("ambientReflectionCoeff", ambientReflectionCoeff);
-	_shader.setUniform("diffuseReflectionCoeff", diffuseReflectionCoeff);
-	_shader.setUniform("specularReflectionCoeff", specularReflectionCoeff);
-	_shader.setUniform("specularExponent", specularExponent);
-    
-	_shader.setUniform("lightPosition", _lightPosition);
-	_shader.setUniform("ambientLightIntensity", ambientLightIntensity);
-	_shader.setUniform("diffuseLightIntensity", diffuseLightIntensity);
-	_shader.setUniform("specularLightIntensity", specularLightIntensity);
-
-	/*_shader.setUniform("diffuseRamp", _diffuseRamp);
-	_shader.setUniform("specularRamp", _specularRamp);*/
-
-    
-    
-    
-    
-    
-
-	// Draw the model
-	_modelMesh->draw(_shader);
+	_box->draw(_shader, model);
 
 	
-	// For debugging purposes, let's draw a sphere to reprsent each "light bulb" in the scene, that way
-	// we can make sure the lighting on the bunny makes sense given the position of each light source.
-	Sphere s(vec3(_lightPosition), 0.1f, vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	s.draw(_shader, glm::mat4(1.0));
+	double deltaTime = _curFrameTime - _lastTime;
+	std::string fps = "FPS: " + std::to_string(1.0/deltaTime);
+	drawText(fps, 10, 10, windowHeight, windowWidth);
+}
 
-	// Another useful aid for debugging: draw vectors to the light sources
-	if (_drawLightVector) {
-		Cylinder l(vec3(-0.3, 0.8, 0), vec3(_lightPosition), 0.01f, vec4(1.0f, 1.0f, 0.0f, 1.0f));
-		l.draw(_shader, glm::mat4(1.0));
+void Hair::drawText(const std::string text, float xPos, float yPos, GLfloat windowHeight, GLfloat windowWidth) {
+	//float lh = 0;
+	//fonsVertMetrics(fs, NULL, NULL, &lh);
+	//double width = fonsTextBounds(fs, text.c_str(), NULL, NULL) + 40;
+	//double height = lh + 40;
+
+	_textShader.use();
+	_textShader.setUniform("projection_mat", glm::ortho(0.f, windowWidth, windowHeight, 0.f, -1.f, 1.f));
+	_textShader.setUniform("view_mat", glm::mat4(1.0));
+	_textShader.setUniform("model_mat", glm::mat4(1.0));
+	_textShader.setUniform("lambertian_texture", 0);
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	fonsDrawText(fs, xPos, yPos, text.c_str(), NULL);
+
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	_shader.use();
+
+}
+
+void Hair::reloadShaders()
+{
+	_shader.compileShader("texture.vert", GLSLShader::VERTEX);
+	_shader.compileShader("texture.frag", GLSLShader::FRAGMENT);
+	_shader.link();
+	_shader.use();
+}
+
+void Hair::initializeText() {
+	int fontNormal = FONS_INVALID;
+	fs = nullptr;
+
+	fs = glfonsCreate(512, 512, FONS_ZERO_TOPLEFT);
+	if (fs == NULL) {
+		assert(false);//Could not create stash
 	}
+
+	fontNormal = fonsAddFont(fs, "sans", "DroidSansMono.ttf");
+	if (fontNormal == FONS_INVALID) {
+		assert(false);// Could not add font normal.
+	}
+
+	unsigned int white = glfonsRGBA(255, 255, 255, 255);
+
+	fonsClearState(fs);
+	fonsSetSize(fs, 20);
+	fonsSetFont(fs, fontNormal);
+	fonsSetColor(fs, white);
+	fonsSetAlign(fs, FONS_ALIGN_LEFT | FONS_ALIGN_TOP);
+
+	_textShader.compileShader("textRendering.vert", GLSLShader::VERTEX);
+	_textShader.compileShader("textRendering.frag", GLSLShader::FRAGMENT);
+	_textShader.link();
 }
