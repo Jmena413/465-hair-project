@@ -1,5 +1,5 @@
-#ifndef SHADYBUNNY_H
-#define SHADYBUNNY_H
+#ifndef HAIR_H
+#define HAIR_H
 
 
 #include <api/MinVR.h>
@@ -34,13 +34,13 @@ using namespace MinVR;
 #include <BasicGraphics.h>
 using namespace basicgraphics;
 
-class ShadyBunny : public VRApp {
+class Hair : public VRApp {
 public:
     
     /** The constructor passes argc, argv, and a MinVR config file on to VRApp.
      */
-	ShadyBunny(int argc, char** argv);
-    virtual ~ShadyBunny();
+	Hair(int argc, char** argv);
+    virtual ~Hair();
 
     
     /** USER INTERFACE CALLBACKS **/

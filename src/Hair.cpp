@@ -1,9 +1,9 @@
-#include "ShadyBunnies.h"
+#include "Hair.h"
 using namespace basicgraphics;
 
 #include <config/VRDataIndex.h>
 
-ShadyBunny::ShadyBunny(int argc, char** argv) : VRApp(argc, argv)
+Hair::Hair(int argc, char** argv) : VRApp(argc, argv)
 {
     _turntable.reset(new TurntableManipulator(3, 0.3, 0.5));
     _turntable->setCenterPosition(vec3(-0.3, 0.8, 0));
@@ -17,12 +17,12 @@ ShadyBunny::ShadyBunny(int argc, char** argv) : VRApp(argc, argv)
 
 }
 
-ShadyBunny::~ShadyBunny()
+Hair::~Hair()
 {
 	shutdown();
 }
 
-void ShadyBunny::onAnalogChange(const VRAnalogEvent &state) {
+void Hair::onAnalogChange(const VRAnalogEvent &state) {
     // This routine is called for all Analog_Change events.  Check event->getName()
     // to see exactly which analog input has been changed, and then access the
     // new value with event->getValue().
@@ -43,7 +43,7 @@ void ShadyBunny::onAnalogChange(const VRAnalogEvent &state) {
 }
 
 
-void ShadyBunny::onButtonDown(const VRButtonEvent &event) {
+void Hair::onButtonDown(const VRButtonEvent &event) {
     _turntable->onButtonDown(event);
     string name = event.getName();
     if (name == "KbdL_Down") {
@@ -79,16 +79,16 @@ void ShadyBunny::onButtonDown(const VRButtonEvent &event) {
 }
 
 
-void ShadyBunny::onButtonUp(const VRButtonEvent &event) {
+void Hair::onButtonUp(const VRButtonEvent &event) {
     _turntable->onButtonUp(event);
 }
 
 
-void ShadyBunny::onCursorMove(const VRCursorEvent &event) {
+void Hair::onCursorMove(const VRCursorEvent &event) {
     _turntable->onCursorMove(event);
 }
 
-void ShadyBunny::reloadShaders()
+void Hair::reloadShaders()
 {
 	_shader.compileShader("BlinnPhong.vert", GLSLShader::VERTEX);
 	_shader.compileShader("BlinnPhong.frag", GLSLShader::FRAGMENT);
@@ -96,7 +96,7 @@ void ShadyBunny::reloadShaders()
 	_shader.use();
 }
     
-void ShadyBunny::onRenderGraphicsContext(const VRGraphicsState &renderState) {
+void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
     // This routine is called once per graphics context at the start of the
     // rendering process.  So, this is the place to initialize textures,
     // load models, or do other operations that you only want to do once per
@@ -140,7 +140,7 @@ void ShadyBunny::onRenderGraphicsContext(const VRGraphicsState &renderState) {
     }
 }
 
-void ShadyBunny::onRenderGraphicsScene(const VRGraphicsState &renderState) {
+void Hair::onRenderGraphicsScene(const VRGraphicsState &renderState) {
     // This routine is called once per eye.  This is the place to actually
     // draw the scene.
     
