@@ -37,7 +37,7 @@ public:
     
     /** The constructor passes argc, argv, and a MinVR config file on to VRApp.
      */
-    Hair(int argc, char** argv);
+	Hair(int argc, char** argv);
     virtual ~Hair();
 
     
@@ -72,4 +72,4 @@ private:
 };
 
 
-#endif //Hair
+#endif //HAIR_H

@@ -1,6 +1,6 @@
 
 # !!!!!!!!!!!!! EDIT THE FOLLOWING LINE AS NEEDED TO POINT AT YOUR BASIC GRAPHICS LIBARARY INSTALL !!!!!!!!!!!!! 
-list(APPEND CMAKE_PREFIX_PATH ../basicgraphics/build/install ../minvr/build/install /Users/bjackson/Documents/classes/comp494-graphics/code/minvr/build/install /Users/bjackson/Documents/classes/comp494-graphics/code/basicgraphics/build/install)
+list(APPEND CMAKE_PREFIX_PATH ../basicgraphics/build/install ../minvr/build/install)
 
 
 
@@ -26,7 +26,7 @@ AutoBuild_init()
 
 #---------------------- Source for this Project ----------------------
 
-project(Hair)
+project(basicgraphics-example)
 
 message(STATUS "==== BUILDING ${PROJECT_NAME}")
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
@@ -82,12 +82,12 @@ AutoBuild_use_package_OpenGL(${PROJECT_NAME} PUBLIC)
 
 if (NOT MSVC)
    find_package(ZLIB REQUIRED)
+   find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+   target_link_libraries(${PROJECT_NAME} PUBLIC ${CORE_FOUNDATION_FRAMEWORK})
 endif()
 
 if (APPLE)
-   find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
-   target_link_libraries(${PROJECT_NAME} PUBLIC ${CORE_FOUNDATION_FRAMEWORK})
-   add_definitions(-DGL_SILENCE_DEPRECATION)
+  add_definitions( -DGL_SILENCE_DEPRECATION )
 endif()
 
 # GLEW
@@ -104,14 +104,14 @@ if (WIN32)
 endif(WIN32)
 
 #copy resource files to build folder so that the executable can find them in the working directory
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
-					   )
+#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                       ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
+#					   )
 			
 #copy the basic graphics resources to the build directory
 get_filename_component(RESOURCES_RESOLVED_PATH "${BasicGraphics_DIR}/../../../../../resources"
-                       REALPATH CACHE) 			
+                       REALPATH CACHE)			
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                        "${RESOURCES_RESOLVED_PATH}" $<TARGET_FILE_DIR:${PROJECT_NAME}>/
@@ -154,21 +154,22 @@ if( MSVC )
   #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
   #                   COMMAND ${CMAKE_COMMAND} -E copy
   #                       "${ASSIMP_RESOLVED_PATH}" $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#              )
+#		  			   )
 
   get_filename_component(GLEWOPT_RESOLVED_PATH "${MinVR_DIR}\\..\\..\\..\\bin\\glew32.dll"
-                       REALPATH CACHE)            
+                       REALPATH CACHE)						
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy
                          "${GLEWOPT_RESOLVED_PATH}" $<TARGET_FILE_DIR:${PROJECT_NAME}>
-               )
-             
+		  			   )
+					   
   get_filename_component(GLEWDEB_RESOLVED_PATH "${MinVR_DIR}\\..\\..\\..\\bin\\glew32d.dll"
                        REALPATH CACHE)  
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                      COMMAND ${CMAKE_COMMAND} -E copy
                          "${GLEWDEB_RESOLVED_PATH}" $<TARGET_FILE_DIR:${PROJECT_NAME}> 
-               )             
-endif()   	  
+		  			   )					   
+endif()					   
+				  
 
 AutoBuild_check_status()
