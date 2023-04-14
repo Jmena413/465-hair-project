@@ -7,6 +7,7 @@ using namespace MinVR;
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include "TurntableManipulator.h"
 
 #ifdef _WIN32
 #include "GL/glew.h"
@@ -43,11 +44,9 @@ public:
     
     /** USER INTERFACE CALLBACKS **/
     virtual void onAnalogChange(const VRAnalogEvent &state);
-    virtual void onButtonDown(const VRButtonEvent &state);
     virtual void onButtonUp(const VRButtonEvent &state);
+    virtual void onButtonDown(const VRButtonEvent& event);
 	virtual void onCursorMove(const VRCursorEvent &state);
-    virtual void onTrackerMove(const VRTrackerEvent &state);
-    
     
     /** RENDERING CALLBACKS **/
     virtual void onRenderGraphicsScene(const VRGraphicsState& state);
@@ -56,14 +55,15 @@ public:
     
 private:
 
-	std::unique_ptr<Box> _box;
-	float _angle;
+    std::unique_ptr<basicgraphics::Mesh> _mesh;
 
 	double _lastTime;
 	double _curFrameTime;
 
 	virtual void reloadShaders();
 	GLSLProgram _shader;
+
+    std::shared_ptr<TurntableManipulator> _turntable;
 
 	void initializeText();
 	void drawText(const std::string text, float xPos, float yPos, GLfloat windowHeight, GLfloat windowWidth);

@@ -9,9 +9,9 @@
 
 Hair::Hair(int argc, char** argv) : VRApp(argc, argv)
 {
+	_turntable.reset(new TurntableManipulator(3, 0.3, 0.5));
+	_turntable->setCenterPosition(vec3(-0.3, 0.8, 0));
 	_lastTime = 0.0;
-	_angle = 0;
-
 }
 
 Hair::~Hair()
@@ -29,49 +29,20 @@ void Hair::onAnalogChange(const VRAnalogEvent &event) {
 		_lastTime = _curFrameTime;
 		_curFrameTime = event.getValue();
 	}
-
-
 }
 
-void Hair::onButtonDown(const VRButtonEvent &event) {
-    // This routine is called for all Button_Down events.  Check event->getName()
-    // to see exactly which button has been pressed down.
-	//You can respond to individual events like this:
-	/*
-    if (event.getName() == _paintOnEvent) {
-        _painting = true;
-    }
-    else if (event.getName() == _grabOnEvent) {
-        _grabbing = true;
-    }
-	*/
-
-	//std::cout << "ButtonDown: " << event.getName() << std::endl;
-
+void Hair::onButtonUp(const VRButtonEvent& event) {
+	_turntable->onButtonUp(event);
 }
 
-void Hair::onButtonUp(const VRButtonEvent &event) {
-    // This routine is called for all Button_Up events.  Check event->getName()
-    // to see exactly which button has been released.
-
-	//std::cout << "ButtonUp: " << event.getName() << std::endl;
+void Hair::onButtonDown(const VRButtonEvent& event) {
+	_turntable->onButtonDown(event);
 }
 
-void Hair::onCursorMove(const VRCursorEvent &event) {
-	// This routine is called for all mouse move events. You can get the absolute position
-	// or the relative position within the window scaled 0--1.
-	
-	//std::cout << "MouseMove: "<< event.getName() << " " << event.getPos()[0] << " " << event.getPos()[1] << std::endl;
+
+void Hair::onCursorMove(const VRCursorEvent& event) {
+	_turntable->onCursorMove(event);
 }
-
-void Hair::onTrackerMove(const VRTrackerEvent &event) {
-    // This routine is called for all Tracker_Move events.  Check event->getName()
-    // to see exactly which tracker has moved, and then access the tracker's new
-    // 4x4 transformation matrix with event->getTransform().
-
-	// We will use trackers when we do a virtual reality assignment. For now, you can ignore this input type.
-}
-
     
 void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
     // This routine is called once per graphics context at the start of the
@@ -110,13 +81,56 @@ void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
 		reloadShaders();
 
 		// Make our model objects
-		_box.reset(new Box(vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), vec4(1.0, 0.0, 0.0, 1.0)));
+		std::vector<Mesh::Vertex> cpuVertexArray;
+		std::vector<int> cpuIndexArray;
+		std::vector<std::shared_ptr<Texture>> textures;
+
+		vec3 normal(0, 0, 1);
+
+		Mesh::Vertex vert;
+		vert.position = vec3(0, 0, 0);
+		vert.normal = normal;
+		vert.texCoord0 = glm::vec2(0, 0);
+		cpuVertexArray.push_back(vert);
+		cpuIndexArray.push_back(0);
+
+		vert.position = vec3(0, 1, 0);
+		vert.normal = normal;
+		vert.texCoord0 = glm::vec2(1, 0);
+		cpuVertexArray.push_back(vert);
+		cpuIndexArray.push_back(1);
+
+		vert.position = vec3(0.5, 0, 0);
+		vert.normal = normal;
+		vert.texCoord0 = glm::vec2(0, 1);
+		cpuVertexArray.push_back(vert);
+		cpuIndexArray.push_back(2);
+
+		vert.position = vec3(0.5, 1, 0);
+		vert.normal = normal;
+		vert.texCoord0 = glm::vec2(0, 1);
+		cpuVertexArray.push_back(vert);
+		cpuIndexArray.push_back(3);
+
+		vert.position = vec3(1, 0, 0);
+		vert.normal = normal;
+		vert.texCoord0 = glm::vec2(0, 1);
+		cpuVertexArray.push_back(vert);
+		cpuIndexArray.push_back(4);
+
+		vert.position = vec3(1, 1, 0);
+		vert.normal = normal;
+		vert.texCoord0 = glm::vec2(0, 1);
+		cpuVertexArray.push_back(vert);
+		cpuIndexArray.push_back(5);
+
+		const int numVertices = cpuVertexArray.size();
+		const int cpuVertexByteSize = sizeof(Mesh::Vertex) * numVertices;
+		const int cpuIndexByteSize = sizeof(int) * cpuIndexArray.size();
+		_mesh.reset(new Mesh(textures, GL_LINES, GL_STATIC_DRAW, cpuVertexByteSize, cpuIndexByteSize, 0, cpuVertexArray, cpuIndexArray.size(), cpuIndexByteSize, &cpuIndexArray[0]));
 
 		initializeText();
     }
-
-	// Update the angle every frame:
-	_angle += glm::radians(1.0);
 }
 
 
@@ -126,26 +140,21 @@ void Hair::onRenderGraphicsScene(const VRGraphicsState &renderState) {
     
 	// clear the canvas and other buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	// Setup the view matrix to set where the camera is located in the scene
-	glm::vec3 eye_world = glm::vec3(0, 0, 5);
-	glm::mat4 view = glm::lookAt(eye_world, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	// When we use virtual reality, this will be replaced by:
-	// eye_world = glm::make_vec3(renderState.getCameraPos())
-	// view = glm::make_mat4(renderState.getViewMatrix());
+	
 
 	// Setup the projection matrix so that things are rendered in perspective
 	GLfloat windowHeight = renderState.index().getValue("FramebufferHeight");
 	GLfloat windowWidth = renderState.index().getValue("FramebufferWidth");
+
+	glm::mat4 view = _turntable->frame();
+	vec3 eyePosition = _turntable->getPos();
+
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), windowWidth / windowHeight, 0.01f, 100.0f);
 	// When we use virtual reality, this will be replaced by:
 	// projection = glm::make_mat4(renderState.getProjectionMatrix())
 	
 	// Setup the model matrix
 	glm::mat4 model = glm::mat4(1.0);
-
-	glm::mat4 rotate = glm::toMat4(glm::angleAxis(_angle, vec3(0, 1, 0))) * glm::toMat4(glm::angleAxis(glm::radians(20.0f), vec3(1.0, 0.0, 0.0)));
-	model = rotate * model;
     
 	// Tell opengl we want to use this specific shader.
 	_shader.use();
@@ -155,12 +164,10 @@ void Hair::onRenderGraphicsScene(const VRGraphicsState &renderState) {
 	
 	_shader.setUniform("model_mat", model);
 	_shader.setUniform("normal_mat", mat3(transpose(inverse(model))));
-	_shader.setUniform("eye_world", eye_world);
+	_shader.setUniform("eye_world", eyePosition);
 
+	_mesh->draw(_shader);
 
-	_box->draw(_shader, model);
-
-	
 	double deltaTime = _curFrameTime - _lastTime;
 	std::string fps = "FPS: " + std::to_string(1.0/deltaTime);
 	drawText(fps, 10, 10, windowHeight, windowWidth);
@@ -193,8 +200,9 @@ void Hair::drawText(const std::string text, float xPos, float yPos, GLfloat wind
 
 void Hair::reloadShaders()
 {
-	_shader.compileShader("texture.vert", GLSLShader::VERTEX);
-	_shader.compileShader("texture.frag", GLSLShader::FRAGMENT);
+	_shader.compileShader("hair-strand.vert", GLSLShader::VERTEX);
+	_shader.compileShader("hair-strand.geom", GLSLShader::GEOMETRY);
+	_shader.compileShader("hair-strand.frag", GLSLShader::FRAGMENT);
 	_shader.link();
 	_shader.use();
 }
