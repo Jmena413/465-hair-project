@@ -1,6 +1,6 @@
 
 # !!!!!!!!!!!!! EDIT THE FOLLOWING LINE AS NEEDED TO POINT AT YOUR BASIC GRAPHICS LIBARARY INSTALL !!!!!!!!!!!!! 
-list(APPEND CMAKE_PREFIX_PATH ../basicgraphics/build/install ../minvr/build/install)
+list(APPEND CMAKE_PREFIX_PATH ../basicgraphics/build/install ../minvr/build/install /Users/Owner/comp465/code/minvr/build/install /Users/Owner/comp465/code/basicgraphics/build/install)
 
 
 
@@ -26,7 +26,7 @@ AutoBuild_init()
 
 #---------------------- Source for this Project ----------------------
 
-project(basicgraphics-example)
+project(465-hair-project)
 
 message(STATUS "==== BUILDING ${PROJECT_NAME}")
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
@@ -109,10 +109,10 @@ if (WIN32)
 endif(WIN32)
 
 #copy resource files to build folder so that the executable can find them in the working directory
-#add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                       ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
-#					   )
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:${PROJECT_NAME}>
+					   )
 			
 #copy the basic graphics resources to the build directory
 get_filename_component(RESOURCES_RESOLVED_PATH "${BasicGraphics_DIR}/../../../../../resources"

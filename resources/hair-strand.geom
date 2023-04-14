@@ -35,7 +35,7 @@ void main() {
     }
     vec3 tangent = gl_in[0].gl_Position.xyz - gl_in[1].gl_Position.xyz;
     vec3 eyeVec = normalize(eye_world - gl_in[0].gl_Position.xyz);
-    vec3 line = normalize(cross(tangent, eyeVec)) * 10.0;
+    vec3 line = normalize(cross(tangent, eyeVec));
     
     gl_Position.xyz = gl_in[1].gl_Position.xyz + line;
     gTexCoord = texCoord[0];
