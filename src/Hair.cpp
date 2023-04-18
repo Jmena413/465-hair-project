@@ -10,7 +10,7 @@
 Hair::Hair(int argc, char** argv) : VRApp(argc, argv)
 {
 	_turntable.reset(new TurntableManipulator(3, 0.3, 0.5));
-	_turntable->setCenterPosition(vec3(-0.3, 0.8, 0));
+	_turntable->setCenterPosition(vec3(0.0, 0.0, 0.0));
 	_lastTime = 0.0;
 }
 
@@ -85,41 +85,41 @@ void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
 		std::vector<int> cpuIndexArray;
 		std::vector<std::shared_ptr<Texture>> textures;
 
-		vec3 normal(0, 0, 1);
+		vec3 eyePos = _turntable->getPos();
 
 		Mesh::Vertex vert;
-		vert.position = vec3(0, 0, 0);
-		vert.normal = normal;
-		vert.texCoord0 = glm::vec2(0, 0);
+		vert.position = vec3(0, 1, 0);
+		vert.normal = -normalize(eyePos - vert.position);
+		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(0);
 
-		vert.position = vec3(0, 1, 0);
-		vert.normal = normal;
-		vert.texCoord0 = glm::vec2(1, 0);
+		vert.position = vec3(0, 0, 0);
+		vert.normal = -normalize(eyePos - vert.position);
+		vert.texCoord0 = glm::vec2(0, 0);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(1);
 
-		vert.position = vec3(0.5, 0, 0);
-		vert.normal = normal;
+		vert.position = vec3(0.5, 1, 0);
+		vert.normal = -normalize(eyePos - vert.position);
 		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(2);
 
-		vert.position = vec3(0.5, 1, 0);
-		vert.normal = normal;
-		vert.texCoord0 = glm::vec2(0, 1);
+		vert.position = vec3(0.5, 0, 0);
+		vert.normal = -normalize(eyePos - vert.position);
+		vert.texCoord0 = glm::vec2(0, 0);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(3);
 
-		vert.position = vec3(1, 0, 0);
-		vert.normal = normal;
+		vert.position = vec3(1, 1, 0);
+		vert.normal = -normalize(eyePos - vert.position);
 		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(4);
 
-		vert.position = vec3(1, 1, 0);
-		vert.normal = normal;
+		vert.position = vec3(1, 0, 0);
+		vert.normal = -normalize(eyePos - vert.position);
 		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(5);
