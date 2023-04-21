@@ -9,7 +9,7 @@
 
 Hair::Hair(int argc, char** argv) : VRApp(argc, argv)
 {
-	_turntable.reset(new TurntableManipulator(3, 0.3, 0.5));
+	_turntable.reset(new TurntableManipulator(9.0, 0.3, 0.5));
 	_turntable->setCenterPosition(vec3(0.0, 0.0, 0.0));
 	_lastTime = 0.0;
 }
@@ -147,7 +147,7 @@ void Hair::onRenderGraphicsScene(const VRGraphicsState &renderState) {
 	GLfloat windowWidth = renderState.index().getValue("FramebufferWidth");
 
 	glm::mat4 view = _turntable->frame();
-	vec3 eyePosition = _turntable->getPos();
+	vec3 eyePos = _turntable->getPos();
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), windowWidth / windowHeight, 0.01f, 100.0f);
 	// When we use virtual reality, this will be replaced by:
@@ -164,7 +164,7 @@ void Hair::onRenderGraphicsScene(const VRGraphicsState &renderState) {
 	
 	_shader.setUniform("model_mat", model);
 	_shader.setUniform("normal_mat", mat3(transpose(inverse(model))));
-	_shader.setUniform("eye_world", eyePosition);
+	_shader.setUniform("eye_world", eyePos);
 
 	_mesh->draw(_shader);
 
