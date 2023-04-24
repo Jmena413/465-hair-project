@@ -96,7 +96,7 @@ void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
 
 		vert.position = vec3(0, 0, 0);
 		vert.normal = -normalize(eyePos - vert.position);
-		vert.texCoord0 = glm::vec2(0, 0);
+		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(1);
 
@@ -108,7 +108,7 @@ void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
 
 		vert.position = vec3(0.5, 0, 0);
 		vert.normal = -normalize(eyePos - vert.position);
-		vert.texCoord0 = glm::vec2(0, 0);
+		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(3);
 
