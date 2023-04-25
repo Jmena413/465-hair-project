@@ -9,7 +9,7 @@
 
 Hair::Hair(int argc, char** argv) : VRApp(argc, argv)
 {
-	_turntable.reset(new TurntableManipulator(9.0, 0.3, 0.5));
+	_turntable.reset(new TurntableManipulator(1.0, 0.3, 0.5));
 	_turntable->setCenterPosition(vec3(0.0, 0.0, 0.0));
 	_lastTime = 0.0;
 }
@@ -94,35 +94,23 @@ void Hair::onRenderGraphicsContext(const VRGraphicsState &renderState) {
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(0);
 
-		vert.position = vec3(0, 0, 0);
+		vert.position = vec3(0.05, 0.75, 0);
 		vert.normal = -normalize(eyePos - vert.position);
 		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(1);
 
-		vert.position = vec3(0.5, 1, 0);
+		vert.position = vec3(0.10, 0.5, 0);
 		vert.normal = -normalize(eyePos - vert.position);
 		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(2);
 
-		vert.position = vec3(0.5, 0, 0);
+		vert.position = vec3(0.10, 0, 0);
 		vert.normal = -normalize(eyePos - vert.position);
 		vert.texCoord0 = glm::vec2(0, 1);
 		cpuVertexArray.push_back(vert);
 		cpuIndexArray.push_back(3);
-
-		vert.position = vec3(1, 1, 0);
-		vert.normal = -normalize(eyePos - vert.position);
-		vert.texCoord0 = glm::vec2(0, 1);
-		cpuVertexArray.push_back(vert);
-		cpuIndexArray.push_back(4);
-
-		vert.position = vec3(1, 0, 0);
-		vert.normal = -normalize(eyePos - vert.position);
-		vert.texCoord0 = glm::vec2(0, 1);
-		cpuVertexArray.push_back(vert);
-		cpuIndexArray.push_back(5);
 
 		const int numVertices = cpuVertexArray.size();
 		const int cpuVertexByteSize = sizeof(Mesh::Vertex) * numVertices;

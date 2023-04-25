@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 layout(lines) in;
 
@@ -17,7 +17,7 @@ void main() {
     vec3 botEyeVec = normalize(eye_world - gl_in[1].gl_Position.xyz);
     vec3 topLine = normalize(cross(tangent, topEyeVec));
     vec3 botLine = normalize(cross(tangent, botEyeVec));
-    float hairWidth = 0.1;
+    float hairWidth = 0.05;
     
     gl_Position.xyz = gl_in[1].gl_Position.xyz - hairWidth * botLine;
     gl_Position.w = 1.0;

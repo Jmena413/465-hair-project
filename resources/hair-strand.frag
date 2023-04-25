@@ -1,4 +1,4 @@
-#version 330
+#version 410
 
 /** Diffuse/ambient surface color */
 uniform sampler2D textureSampler;

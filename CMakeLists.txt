@@ -49,6 +49,8 @@ set(extra_files
   resources/hair-strand.frag
   resources/hair-strand.geom
   resources/hair-strand.vert
+  resources/hair-strand.tesc
+  resources/hair-strand.tese
 )
 
 set_source_files_properties(${extra_files} PROPERTIES HEADER_FILE_ONLY TRUE)
