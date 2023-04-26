@@ -189,6 +189,8 @@ void Hair::drawText(const std::string text, float xPos, float yPos, GLfloat wind
 void Hair::reloadShaders()
 {
 	_shader.compileShader("hair-strand.vert", GLSLShader::VERTEX);
+	_shader.compileShader("hair-strand.tesc", GLSLShader::TESS_CONTROL);
+	_shader.compileShader("hair-strand.tese", GLSLShader::TESS_EVALUATION);
 	_shader.compileShader("hair-strand.geom", GLSLShader::GEOMETRY);
 	_shader.compileShader("hair-strand.frag", GLSLShader::FRAGMENT);
 	_shader.link();

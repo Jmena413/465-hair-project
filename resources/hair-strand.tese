@@ -2,15 +2,27 @@
 
 layout(isolines) in;
 
-float lagrangeInterpolate(float x, vec2 v1, vec2 v2, vec2 v3, vec2 v4) {
-	float term1 = v1.y * (x - v2.x) * (x - v3.x) * (x - v4.x) / (v1.x - v2.x) * (v1.x - v3.x)* (v1.x - v4.x);
-	float term2 = v2.y * (x - v1.x) * (x - v3.x) * (x - v4.x) / (v2.x - v1.x) * (v2.x - v3.x)* (v2.x - v4.x);
-	float term3 = v3.y * (x - v1.x) * (x - v2.x) * (x - v4.x) / (v3.x - v1.x) * (v3.x - v2.x)* (v3.x - v4.x);
-	float term4 = v4.y * (x - v1.x) * (x - v2.x) * (x - v3.x) / (v4.x - v1.x) * (v4.x - v2.x)* (v4.x - v3.x);
-	float interpolatedY = term1 + term2 + term3 + term4;
-	return interpolatedY;
-}
+in vec2 vertexTexCoord[];
+
+out vec2 texCoord[];
 
 void main() {
-	
+	//cubic Bezier interpolation
+	vec4 controlPoint1 = gl_in[0].gl_Position;
+	vec4 controlPoint2 = gl_in[1].gl_Position;
+	vec4 controlPoint3 = gl_in[2].gl_Position;
+	vec4 controlPoint4 = gl_in[3].gl_Position;
+
+	mat4 splineMatrix;
+	splineMatrix[0] = vec4(1, -3, 3, 1);
+	splineMatrix[1] = vec4(0, 3, -6, 3);
+	splineMatrix[2] = vec4(0, 0, 3, -3);
+	splineMatrix[3] = vec4(0, 0, 0, 1);
+
+	vec4 monomialBasis = vec4(1, gl_Position.x, pow(gl_Position.x, 2), pow(gl_Position.x, 3));
+
+	vec4 sMxmB = splineMatrix * monomialBasis;
+
+	gl_Position = controlPoint1 * sMxmB[0] + controlPoint2 * sMxmB[1] + controlPoint3 * sMxmB[2] + controlPoint4 * sMxmB[3];
+	texCoord[gl_PrimitiveID] = texCoord[gl_PrimitiveID];
 }
