@@ -8,6 +8,7 @@ using namespace MinVR;
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "TurntableManipulator.h"
+#include <stdlib.h>
 
 #ifdef _WIN32
 #include "GL/glew.h"

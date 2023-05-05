@@ -8,6 +8,10 @@ in vec2 vertexTexCoord[];
 
 out vec2 textCoord;
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main() {
 	//cubic Bezier interpolation
 	vec3 controlPoint1 = gl_in[0].gl_Position.xyz;
@@ -24,26 +28,9 @@ void main() {
 
 	vec3 cubicBezierInterpolation = controlPoint1 * mB1 + controlPoint2 * mB2 + controlPoint3 * mB3 + controlPoint4 * mB4;
 
+	float offset = rand(vec2(gl_TessCoord.y, 1.0));
+	float d = 1.2;
+	cubicBezierInterpolation = vec3(cubicBezierInterpolation.x + offset * d, cubicBezierInterpolation.y + offset * d, cubicBezierInterpolation.z + offset * d);
 	gl_Position = projection_mat * view_mat * model_mat * vec4(cubicBezierInterpolation.xyz, 1.0);
-
-	//offset calculation
-	/*
-	vec4 v1 = normalize(gl_in[0].gl_Position - gl_in[1].gl_Position);
-	vec4 v2 = normalize(vec4(1.0, 1.0, (-v1.x - v1.y)/v1.z , 1.0));
-	vec4 v3 = normalize(vec4(cross(v1.xyz, v2.xyz), 1.0));
-
-	float r = max(0.5, noise1(gl_Position.x));
-	float theta = noise1(gl_Position.x) * 2 * 3.1415927;
-
-	gl_Position.x += r * cos(theta) * v2.x + r * sin(theta) * v3.x;
-	gl_Position.y += r * cos(theta) * v2.y + r * sin(theta) * v3.y;
-	gl_Position.z += r * cos(theta) * v2.z + r * sin(theta) * v3.z;
-	gl_Position.w = 1.0;
-	*/
-
-	float offset = gl_TessCoord.y;
-	gl_Position.x += offset * 0.8;
-	gl_Position.y += offset * 0.8;
-
 	textCoord = vertexTexCoord[gl_PrimitiveID];
 }
